@@ -26,6 +26,9 @@ dotfiles:
   f_fishfile:
     dst: ~/.config/fish/fishfile
     src: config/fish/fishfile
+  f_gitconfig:
+    dst: ~/.gitconfig
+    src: gitconfig
   f_init.toml:
     dst: ~/.SpaceVim.d/init.toml
     src: SpaceVim.d/init.toml
@@ -41,6 +44,9 @@ dotfiles:
   f_show-term-colors256:
     dst: ~/bin/show-term-colors256
     src: bin/show-term-colors256
+  f_tmux.conf:
+    dst: ~/.tmux.conf
+    src: tmux.conf
 profiles:
   MacBook-Pro.lan.r35.net:
     dotfiles:
@@ -54,3 +60,5 @@ profiles:
     - f_ec2-ls
     - f_show-ips
     - f_show-term-colors256
+    - f_tmux.conf
+    - f_gitconfig
