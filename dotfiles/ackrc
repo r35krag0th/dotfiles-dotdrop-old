@@ -1,0 +1,9 @@
+--type-set=md=.md,.mkd,.markdown
+--pager=less -FRX
+--smart-case
+--color
+--sort-files
+--follow
+--group
+--show-types
+--pager=less -r

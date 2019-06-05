@@ -11,6 +11,9 @@ config:
   showdiff: false
   workdir: ~/.config/dotdrop
 dotfiles:
+  d_iterm2:
+    dst: ~/.iterm2
+    src: iterm2
   f_000-r35.fish:
     dst: ~/.config/fish/conf.d/000-r35.fish
     src: config/fish/conf.d/000-r35.fish
@@ -20,6 +23,12 @@ dotfiles:
   f_002-r35-jira.fish:
     dst: ~/.config/fish/conf.d/002-r35-jira.fish
     src: config/fish/conf.d/002-r35-jira.fish
+  f_ackrc:
+    dst: ~/.ackrc
+    src: ackrc
+  f_beerme:
+    dst: ~/bin/beerme
+    src: bin/beerme
   f_ec2-ls:
     dst: ~/bin/ec2-ls
     src: bin/ec2-ls
@@ -29,9 +38,18 @@ dotfiles:
   f_gitconfig:
     dst: ~/.gitconfig
     src: gitconfig
+  f_gitignore_global:
+    dst: ~/.gitignore_global
+    src: gitignore_global
   f_init.toml:
     dst: ~/.SpaceVim.d/init.toml
     src: SpaceVim.d/init.toml
+  f_iterm2_shell_integration.bash:
+    dst: ~/.iterm2_shell_integration.bash
+    src: iterm2_shell_integration.bash
+  f_iterm2_shell_integration.zsh:
+    dst: ~/.iterm2_shell_integration.zsh
+    src: iterm2_shell_integration.zsh
   f_package.json:
     dst: ~/.config/yarn/global/package.json
     src: config/yarn/global/package.json
@@ -44,6 +62,9 @@ dotfiles:
   f_show-term-colors256:
     dst: ~/bin/show-term-colors256
     src: bin/show-term-colors256
+  f_tldrrc:
+    dst: ~/.tldrrc
+    src: tldrrc
   f_tmux.conf:
     dst: ~/.tmux.conf
     src: tmux.conf
@@ -62,3 +83,10 @@ profiles:
     - f_show-term-colors256
     - f_tmux.conf
     - f_gitconfig
+    - f_ackrc
+    - f_iterm2_shell_integration.bash
+    - f_iterm2_shell_integration.zsh
+    - d_iterm2
+    - f_tldrrc
+    - f_beerme
+    - f_gitignore_global
