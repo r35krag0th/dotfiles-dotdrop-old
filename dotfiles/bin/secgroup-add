@@ -1,0 +1,85 @@
+#!/usr/bin/env python3
+# vim: ft=python
+
+import boto3
+import sys
+
+def print_error(a_message: str):
+    print(f'\033[31m[ERROR]\033[0m {a_message}')
+
+
+if __name__ == '__main__':
+    if len(sys.argv) == 1:
+        print_error('What security group? (sg-abcdef1234)')
+        sys.exit(1)
+
+    if len(sys.argv) == 2:
+        print_error('What proto/port? (tcp/22)')
+        sys.exit(2)
+
+    if len(sys.argv) == 3:
+        print_error('What CIDR?  (123.123.123.123/32)')
+        sys.exit(3)
+
+    if len(sys.argv) == 4:
+        print_error('Please provide a description as well.')
+        sys.exit(4)
+
+    secgroup_id = sys.argv[1]
+
+    # tcp/all
+    # all/all
+    # udp/all
+    # icmp/all
+    # tcp/22
+    # udp/53
+    proto, port = sys.argv[2].split('/')
+    if proto == 'all':
+        proto = -1
+
+    if port == 'all':
+        port = -1
+    else:
+        port = int(port)
+
+    cidr = sys.argv[3]
+    description = sys.argv[4]
+
+    # Automatically add the /32 if you forgot it
+    if cidr.find('/') < 0:
+        cidr = f'{cidr}/32'
+
+    print("\033[1;32mAuthorize SecGroup Ingress\033[0m")
+    print("\033[32m==========================\033[0m")
+    print("")
+    print(f"\033[33m > \033[0m\033[1mId: \033[0m{secgroup_id}")
+    print(f"\033[33m > \033[0m\033[1mFrom: \033[0m{proto}/{port}")
+    print(f"\033[33m > \033[0m\033[1mAddress: \033[0m{cidr}")
+    print(f"\033[33m > \033[0m\033[1mDescription: \033[0m{description}")
+    print("")
+
+    # sys.exit(0)
+
+    # ec2_client = boto3.client('ec2')
+    ec2_resource = boto3.resource('ec2')
+    secgroup = ec2_resource.SecurityGroup(secgroup_id)
+
+    # print(secgroup.ip_permissions)
+    response = secgroup.authorize_ingress(
+        IpPermissions=[
+            {
+                'IpRanges': [
+                    {
+                        'CidrIp': cidr,
+                        'Description': description
+                    }
+                ],
+                'FromPort': port,
+                'IpProtocol': proto,
+                'ToPort': port,
+            }
+        ] 
+    )
+
+    print("Use the following command to check the security group:")
+    print(f"\033[1;32msecgroup-ls {secgroup_id}\033[0m")

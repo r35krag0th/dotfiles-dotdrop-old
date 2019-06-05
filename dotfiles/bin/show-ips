@@ -1,0 +1,92 @@
+#!/usr/bin/env ruby
+# vim: ft=ruby
+
+require 'ohai'
+require 'ipaddr'
+require 'netaddr'
+require 'net/http'
+require 'Open3'
+
+def ip_and_mask_to_cidr(ip_addr, netmask)
+    IPAddr.new()
+end
+
+def get_public_ip
+  Net::HTTP.get URI('https://icanhazip.com')
+end
+
+def is_cloakvpn_running
+  #  TRUE if 0
+  # FALSE if 1+
+  #   NIL if FAILED
+  return system("ps aux | grep openvpn | grep -i cloak 2>&1 >/dev/null")
+end
+
+KnownInterface = Struct.new(:name, :ipaddrs, :default_route) do
+  def interface_color
+    return 243 if name.start_with? 'lo'
+    return 33 if name.start_with? 'en'
+    return 201 if name.start_with? 'utun'
+    return 202 if name.start_with? 'ham'
+    return 99
+  end
+
+  def default_route_string
+    return "\033[38;5;46m|>\033[0m" if default_route
+    return "  "
+  end
+
+  def ip_addr_string
+    joined_str = ''
+    ipaddrs.map! { |x| "\033[38;5;46m#{x}\033[0m" } if default_route
+    joined_str = ipaddrs.join(" \033[38;5;242m|\033[0m ")
+
+    return "\033[38;5;242m[\033[0m #{joined_str} \033[38;5;242m]\033[0m"
+  end
+
+  def display_string
+    "#{default_route_string} \033[38;5;#{interface_color}m#{name.rjust 5}\033[0m -> #{ip_addr_string}"
+  end
+end
+
+ohai = Ohai::System.new
+ohai.all_plugins(['network'])
+gw_interface = ohai.data[:network][:default_interface]
+gw_ipaddr = ohai.data[:network][:default_gateway]
+
+# foo = ohai.to_json
+known_interfaces = []
+ohai.data[:network][:interfaces].each do |name, data|
+
+    known_ips = []
+    mac_address = nil
+    data[:addresses].each do |addr, addr_data|
+        # next unless addr_data[:addresses].contains? 'inet4' or data[:addresses].has? 'inet6'
+        next unless ['lladdr', 'inet', 'inet6'].include? addr_data[:family]
+
+        mac_address = addr if addr_data[:family] == 'lladdr'
+        # known_ips.push "#{addr}/#{addr_data['netmask']}" if addr_data[:family] == 'inet'
+        known_ips.push "#{addr}" if addr_data[:family] == 'inet' and not addr.start_with? '169.254'
+
+        known_ips.push "#{addr}" if addr_data[:family] == 'inet6' and not addr.start_with? 'fe80:'
+    end
+
+    is_default_interface = name == gw_interface
+    known_interfaces.push KnownInterface.new(name, known_ips, name == gw_interface) if known_ips.count > 0
+
+end
+
+known_interfaces.each { |x| puts x.display_string }
+
+puts ""
+puts "\033[38;5;69mDefault GW:\033[0m #{gw_ipaddr}"
+puts "\033[38;5;39m Public IP:\033[0m #{get_public_ip}"
+puts ""
+
+if is_cloakvpn_running
+  puts "You are \033[38;5;46mconnected \033[0mto \033[38;5;45mCloakVPN\033[0m"
+else
+  puts "You are \033[38;5;196mnot connected \033[0mto \033[38;5;45mCloakVPN\033[0m"
+end
+
+puts ""

@@ -1,0 +1,162 @@
+#!/usr/bin/env python3
+# vim: ft=python
+
+import boto3
+import sys
+import click
+import botocore
+
+STATE_TO_COLOR = {
+    'pending': 0,
+    'running': 40,
+    'stopped': 160,
+    'shutting-down': 166,
+    'terminated': 199
+}
+
+
+def status_to_color_circle(status):
+    color = STATE_TO_COLOR.get(status, 239)
+    return f'\033[38;5;{color}m\u2b24\033[0m {status}'
+
+
+@click.command()
+@click.option('--id', 'input_type', flag_value='byId')
+@click.option('--name', 'input_type', flag_value='byName')
+@click.option('--ip', 'input_type', flag_value='byIp')
+@click.option('--tag', 'input_type', flag_value='byTag')
+@click.option('--region', default='us-west-2', type=click.Choice([
+    'us-west-1',
+    'us-west-2',
+    'us-east-1',
+    'us-east-2'
+]))
+@click.option('--secgroup', 'input_type', flag_value='bySecGroup')
+@click.argument('user_input')
+def handler(input_type, user_input, region):
+    client_kwargs = {}
+
+    # applied_filters = []
+    # instance_ids = []
+    if input_type == 'byId':
+        client_kwargs.setdefault('InstanceIds', [])
+        client_kwargs['InstanceIds'].append(user_input)
+    elif input_type == 'byName':
+        client_kwargs.setdefault('Filters', [])
+        client_kwargs['Filters'].append({
+            'Name': 'tag:Name',
+            'Values': [
+                f'*{user_input}*'
+            ]
+        })
+    elif input_type == 'byIp':
+        client_kwargs.setdefault('Filters', [])
+        client_kwargs['Filters'].append({
+            'Name': 'ip-address',
+            'Values': [
+                user_input
+            ]
+        })
+    elif input_type == 'bySecGroup':
+        client_kwargs.setdefault('Filters', [])
+        client_kwargs['Filters'].append({
+            'Name': 'instance.group-id',
+            'Values': [
+                user_input
+            ]
+        })
+    else:
+        print_error('--id, --name, or --ip is required')
+        sys.exit(1)
+
+    ec2_client = boto3.client('ec2', region_name=region)
+    response = None
+    try:
+        response = ec2_client.describe_instances(**client_kwargs)
+        for reservation in response['Reservations']:
+            for instance in reservation['Instances']:
+                instance_name = get_value_for_tag_key(instance['Tags'], 'Name')
+
+                print(f"\033[1;32m{instance_name}\033[0m")
+                print(f"\033[32m{'=' * len(instance_name)}\033[0m")
+                print_kv('Id', instance['InstanceId'])
+                print_kv('Type', instance['InstanceType'])
+                print_kv('State', status_to_color_circle(instance['State']['Name']))
+                print_kv('KeyName', instance.get('KeyName', '<none>'))
+                print_kv('EBS Optimized?', 'yes' if instance['EbsOptimized'] else 'no')
+                print_kv('AMI', instance.get('ImageId', '<none>'))
+                print_kv('Tags', '')
+                print_tags(instance['Tags'])
+                print_kv('SecGroups', '')
+                print_secgroups(instance['SecurityGroups'])
+                print_kv('BlockDevices', '')
+                # print(f"    \033[35m[root] \033[34m{instance['RootDeviceName']} \033[32m--> \033[36m{instance['RootDeviceType']}\033[0m")
+                print_block_device_mappings(
+                    instance['BlockDeviceMappings'],
+                    instance['RootDeviceName']
+                )
+
+                print_kv('Public IP', instance.get('PublicIpAddress'))
+                print_kv('Private IP', instance.get('PrivateIpAddress'))
+
+                print("")
+                # print("")
+
+        print("")
+    except botocore.exceptions.ClientError as thrown_error:
+        print_error(thrown_error)
+        sys.exit(2)
+
+def get_value_for_tag_key(list_of_tags, key_name):
+    for tag in list_of_tags:
+        if tag['Key'] == key_name:
+            return tag['Value']
+    return None
+
+
+def print_kv(k, v):
+    print(f'\033[33m + \033[0m\033[1m{k}: \033[0m{v}')
+
+
+def print_tags(list_of_tags):
+    for tag in list_of_tags:
+        modified_key = tag['Key'].replace(':', '\033[35m:\033[34m')
+        print(f"    \033[1;34m{modified_key}\033[0;32m=\033[0m{tag['Value']}")
+
+
+def print_block_device_mappings(mappings, root_device=None):
+    """
+    {
+        "DeviceName": "/dev/sda1",
+        "Ebs": {
+            "AttachTime": "2016-03-06T05:22:58.000Z",
+            "DeleteOnTermination": true,
+            "Status": "attached",
+            "VolumeId": "vol-8d40784d"
+        }
+    },
+    """
+    for device in mappings:
+        suffix_flags = []
+        if root_device is not None and device['DeviceName'] == root_device:
+            suffix_flags.append('\033[35m[root]\033[0m')
+
+
+        suffix_flags = ' '.join(suffix_flags)
+        if 'Ebs' in device:
+            print(f"    \033[34m{device['Ebs']['VolumeId']}\033[0m \033[32m--> \033[36m{device['DeviceName']} {suffix_flags}\033[0m")
+        else:
+            print(f"    \033[34m{device['DeviceName']}\033[0m \033[32m--> \033[36m{device} {suffix_flags}\033[0m")
+
+
+def print_secgroups(list_of_secgroups):
+    for secgroup in list_of_secgroups:
+        print(f"    \033[1;34m{secgroup['GroupId']}\033[0;32m: \033[0m{secgroup['GroupName']}")
+
+
+def print_error(a_message: str):
+    print(f'\033[31m[ERROR]\033[0m {a_message}')
+
+
+if __name__ == '__main__':
+    handler()

@@ -1,0 +1,56 @@
+config:
+  backup: true
+  banner: true
+  create: true
+  dotpath: dotfiles
+  ignoreempty: false
+  keepdot: false
+  link_dotfile_default: nolink
+  link_on_import: nolink
+  longkey: false
+  showdiff: false
+  workdir: ~/.config/dotdrop
+dotfiles:
+  f_000-r35.fish:
+    dst: ~/.config/fish/conf.d/000-r35.fish
+    src: config/fish/conf.d/000-r35.fish
+  f_001-r35-path.fish:
+    dst: ~/.config/fish/conf.d/001-r35-path.fish
+    src: config/fish/conf.d/001-r35-path.fish
+  f_002-r35-jira.fish:
+    dst: ~/.config/fish/conf.d/002-r35-jira.fish
+    src: config/fish/conf.d/002-r35-jira.fish
+  f_ec2-ls:
+    dst: ~/bin/ec2-ls
+    src: bin/ec2-ls
+  f_fishfile:
+    dst: ~/.config/fish/fishfile
+    src: config/fish/fishfile
+  f_init.toml:
+    dst: ~/.SpaceVim.d/init.toml
+    src: SpaceVim.d/init.toml
+  f_package.json:
+    dst: ~/.config/yarn/global/package.json
+    src: config/yarn/global/package.json
+  f_secgroup-add:
+    dst: ~/bin/secgroup-add
+    src: bin/secgroup-add
+  f_show-ips:
+    dst: ~/bin/show-ips
+    src: bin/show-ips
+  f_show-term-colors256:
+    dst: ~/bin/show-term-colors256
+    src: bin/show-term-colors256
+profiles:
+  MacBook-Pro.lan.r35.net:
+    dotfiles:
+    - f_fishfile
+    - f_000-r35.fish
+    - f_001-r35-path.fish
+    - f_002-r35-jira.fish
+    - f_init.toml
+    - f_package.json
+    - f_secgroup-add
+    - f_ec2-ls
+    - f_show-ips
+    - f_show-term-colors256
