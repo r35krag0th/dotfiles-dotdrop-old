@@ -1,30 +1,42 @@
 # vim: ft=fish
+# ==> WARNING!
+# {{@@ header() @@}} -- {{@@ _dotfile_sub_abs_src @@}}
+
+# ==> Debugging
+# echo -e "\033[32m==>\033[0m 000-r35.fish"
+
 set --export --universal EXPECTED_PIPENV_VERSION "2018.5.18"
 
 # Utility functions
 function add_path_to_beginning
-  if not contains -- $argv $fish_user_paths
-    if test -d $argv
-      set --universal fish_user_paths $argv $fish_user_paths
-    #   echo -e "\033[32mAdded[START]\033[0m ==> \033[33m$argv[1]\033[0m"
-    # else
-    #   echo -e "\033[33mSkipped[START]\033[0m ==> \033[31m$argv\033[0m (not directory or missing)"
+    # Handle updating "fish_user_paths"
+    if not contains -- $argv $fish_user_paths
+        if test -d $argv
+            set --universal fish_user_paths $argv $fish_user_paths
+        end
     end
-  # else
-  #   echo -e "\033[36mExists[START]\033[0m ==> \033[34m$argv\033[0m"
-  end
+
+    # Handle updating "PATH"
+    if not contains -- $argv $PATH
+        if test -d $argv
+            set --universal PATH $argv $PATH
+        end
+    end
 end
 
 function add_path_to_end
-    if not contains -- $argv $fish_user_paths 
-      if test -d $argv
-        set --universal fish_user_paths $fish_user_paths $argv
-      #   echo -e "\033[32mAdded[END  ]\033[0m ==> \033[33m$argv[1]\033[0m"
-      # else
-      #   echo -e "\033[33mSkipped[END  ]\033[0m ==> \033[31m$argv\033[0m (missing)"
-      end
-    # else
-    #   echo -e "\033[36mExists[END  ]\033[0m ==> \033[34m$argv\033[0m"
+    # Handle updating "fish_user_paths"
+    if not contains -- $argv $fish_user_paths
+        if test -d $argv
+            set --universal fish_user_paths $fish_user_paths $argv
+        end
+    end
+
+    # Handle updating "PATH"
+    if not contains -- $argv $PATH
+        if test -d $argv
+            set --universal PATH $PATH $argv
+        end
     end
 end
 
@@ -68,7 +80,7 @@ function varclear --description 'Remove duplicates from environment variable'
         end
         set $argv $newvar
         test $count -gt 0
-        and echo Removed $count duplicates from $argv
+        # and echo Removed $count duplicates from $argv
     else
         for a in $argv
             varclear $a
@@ -80,7 +92,7 @@ if status --is-interactive
     set -g fish_user_abbreviations
 
     # Kubernetes
-    alias k8-aec="$HOME/bin/kubectl-1.2.6 --context=aec-primary" 
+    alias k8-aec="$HOME/bin/kubectl-1.2.6 --context=aec-primary"
 
     # App overrides with defaults
     # Hub is a RubyGem
@@ -108,8 +120,8 @@ if status --is-interactive
         # alias la="colorls -la"
         alias la="colorls -A -l --gs --sd"
         alias lt="colorls -A --tree --gs --sd"
-    else
-        echo "ColorLS is not installed ..."
+    # else
+    #     echo "ColorLS is not installed ..."
     end
 
     # Because I'm incredibly lazy
@@ -132,11 +144,13 @@ if status --is-interactive
 end
 
 function fix-pipenv-derps
-  # This is to address the strange problems with pipenv and pip>=18.1
-  #
-  # Commonly you'll get a problem trying to parse requirements... because pipenv
-  # hooked into internal pip functions... which is super shitty.
-  command pip install "pipenv==$EXPECTED_PIPENV_VERSION" --upgrade --upgrade-strategy only-if-needed; pipenv run pip install pip==18.0; pipenv install
+    # This is to address the strange problems with pipenv and pip>=18.1
+    #
+    # Commonly you'll get a problem trying to parse requirements... because pipenv
+    # hooked into internal pip functions... which is super shitty.
+    command pip install "pipenv==$EXPECTED_PIPENV_VERSION" --upgrade --upgrade-strategy only-if-needed
+    pipenv run pip install pip==18.0
+    pipenv install
 end
 
 function tmux
@@ -144,7 +158,7 @@ function tmux
 end
 
 function new-tmux
-    echo "Creating New Tmux with $argv"
+    # echo "Creating New Tmux with $argv"
     command tmux new -s $argv[1]
 end
 
@@ -166,11 +180,12 @@ function us-west2-ssh
 end
 
 function tfv
-  command blast-radius --serve .
+    command blast-radius --serve .
 end
 
 function gfp
-  command git fetch; and git pull
+    command git fetch
+    and git pull
 end
 
 # From CLI Improved...
@@ -193,22 +208,38 @@ function preview
 end
 
 function set_gempath_24
-  # If there is a global shadowing the universal ...
-  set --erase --global GEM_HOME
-  set --erase --global GEM_PATH
-  set --erase --global GEM_ROOT
-  set --export --universal GEM_PATH "$HOME/.gem/ruby/2.4.0:$HOME/.rbenv/versions/2.4.2/lib/ruby/gems/2.4.0"
+    # If there is a global shadowing the universal ...
+    set --erase --global GEM_HOME
+    set --erase --global GEM_PATH
+    set --erase --global GEM_ROOT
+    set --export --universal GEM_PATH "$HOME/.gem/ruby/2.4.0:$HOME/.rbenv/versions/2.4.2/lib/ruby/gems/2.4.0"
 end
 
 function set_gempath_25
-  set --erase --global GEM_HOME
-  set --erase --global GEM_PATH
-  set --erase --global GEM_ROOT
-  set --export --universal GEM_PATH "$HOME/.gem/ruby/2.5.0:$HOME/.rbenv/versions/2.5.3/lib/ruby/gems/2.5.0"
+    set --erase --global GEM_HOME
+    set --erase --global GEM_PATH
+    set --erase --global GEM_ROOT
+    set --export --universal GEM_PATH "$HOME/.gem/ruby/2.5.0:$HOME/.rbenv/versions/2.5.3/lib/ruby/gems/2.5.0"
+end
+
+function set_gempath_26
+    set --erase --global GEM_HOME
+    set --erase --global GEM_PATH
+    set --erase --global GEM_ROOT
+    set --export --universal GEM_PATH "$HOME/.gem/ruby/2.6.0:$HOME/.rbenv/versions/2.6.3/lib/ruby/gems/2.6.0"
 end
 
 function pcard_statement
-  command ps2pdf $argv $argv.pdf
+    command ps2pdf $argv $argv.pdf
+end
+
+function dump_paths
+    echo -e "\033[36m===\033[0m [PATH DUMP -- fish_user_paths]"
+    set -S fish_user_paths
+
+    echo ""
+    echo -e "\033[36m===\033[0m [PATH DUMP -- PATH]"
+    set -S PATH
 end
 
 set --global --export KREW_ROOT "$HOME/.krew"
@@ -236,14 +267,18 @@ set --global SHELL (which fish)
 eval (python -m virtualfish)
 
 ### SETUP FISH COMPLETION PATH ###
-add_to_completion_path $HOME/.config/fish/completions 
-add_to_completion_path $HOME/.local/share/omf/pkg/omf/completions 
-add_to_completion_path /usr/local/Cellar/fish/$FISH_VERSION/etc/fish/completions 
-add_to_completion_path /usr/local/share/fish/vendor_completions.d 
-add_to_completion_path /usr/local/Cellar/fish/$FISH_VERSION/share/fish/completions 
-add_to_completion_path $HOME/.local/share/fish/generated_completions 
+add_to_completion_path $HOME/.config/fish/completions
+add_to_completion_path $HOME/.local/share/omf/pkg/omf/completions
+add_to_completion_path /usr/local/Cellar/fish/$FISH_VERSION/etc/fish/completions
+add_to_completion_path /usr/local/share/fish/vendor_completions.d
+add_to_completion_path /usr/local/Cellar/fish/$FISH_VERSION/share/fish/completions
+add_to_completion_path $HOME/.local/share/fish/generated_completions
 add_to_completion_path /usr/local/share/fish/completions/
 
 # Setup TheFuck -- https://github.com/nvbn/thefuck
 set --export FUCK_BIN (which fuck 2>&1)
-test ! -z $FUCK_BIN -a -x $FUCK_BIN; and thefuck --alias | source
+test ! -z $FUCK_BIN -a -x $FUCK_BIN
+and thefuck --alias | source
+
+# dump_paths
+# echo -e "\033[36m===\033[0m 000-r35.fish"

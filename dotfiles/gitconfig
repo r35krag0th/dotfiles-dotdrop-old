@@ -1,4 +1,8 @@
 # vim: ft=gitconfig
+
+# ==> WARNING!
+# {{@@ header() @@}} -- {{@@ _dotfile_sub_abs_src @@}}
+
 [user]
   name = Bob Saska
   email = git@r35.net

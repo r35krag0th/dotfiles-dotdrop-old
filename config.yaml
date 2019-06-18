@@ -69,7 +69,7 @@ dotfiles:
     dst: ~/.tmux.conf
     src: tmux.conf
 profiles:
-  MacBook-Pro.lan.r35.net:
+  personal-laptop:
     dotfiles:
     - f_fishfile
     - f_000-r35.fish

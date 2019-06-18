@@ -1,3 +1,8 @@
+# ==> WARNING!
+# {{@@ header() @@}} -- {{@@ _dotfile_sub_abs_src @@}}
+
+# ==> Debugging
+
 if [[ -o interactive ]]; then
   if [ "$TERM" != "screen" -a "$ITERM_SHELL_INTEGRATION_INSTALLED" = "" ]; then
     ITERM_SHELL_INTEGRATION_INSTALLED=Yes

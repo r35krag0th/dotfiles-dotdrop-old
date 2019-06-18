@@ -2,6 +2,8 @@
 """Print a swatch using all 256 colors of 256-color-capable terminals."""
 # vim: ft=python
 
+# ==> WARNING!
+# {{@@ header() @@}} -- {{@@ _dotfile_sub_abs_src @@}}
 
 __author__ = "Marius Gedminas <marius@gedmin.as>"
 __url__ = "https://gist.github.com/mgedmin/2762225"

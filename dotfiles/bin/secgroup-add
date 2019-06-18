@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # vim: ft=python
 
+# ==> WARNING!
+# {{@@ header() @@}} -- {{@@ _dotfile_sub_abs_src @@}}
+
 import boto3
 import sys
 

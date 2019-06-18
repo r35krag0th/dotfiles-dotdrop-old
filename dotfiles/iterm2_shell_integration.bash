@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# ==> WARNING!
+# {{@@ header() @@}} -- {{@@ _dotfile_sub_abs_src @@}}
+
 # -- BEGIN ITERM2 CUSTOMIZATIONS --
 if [[ "$TERM" != screen && "$ITERM_SHELL_INTEGRATION_INSTALLED" = "" && "$-" == *i* ]]; then
 ITERM_SHELL_INTEGRATION_INSTALLED=Yes

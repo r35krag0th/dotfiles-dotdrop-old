@@ -1,6 +1,9 @@
 #!/usr/bin/env ruby
 # vim: ft=ruby
 
+# ==> WARNING!
+# {{@@ header() @@}} -- {{@@ _dotfile_sub_abs_src @@}}
+
 require 'ohai'
 require 'ipaddr'
 require 'netaddr'
